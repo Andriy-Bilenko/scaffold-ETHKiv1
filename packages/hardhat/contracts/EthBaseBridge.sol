@@ -17,28 +17,28 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
         address indexed token,
         address indexed user,
         uint256 amount,
-        uint256 timestamp
+        uint256 blockNumber
     );
 
     event TokensReleased(
         address indexed token,
         address indexed user,
         uint256 amount,
-        uint256 timestamp
+        uint256 blockNumber
     );
 
     event WrappedTokensMinted(
         address indexed token,
         address indexed user,
         uint256 amount,
-        uint256 timestamp
+        uint256 blockNumber
     );
 
     event WrappedTokensBurned(
         address indexed token,
         address indexed user,
         uint256 amount,
-        uint256 timestamp
+        uint256 blockNumber
     );
 
     // Mapping to track locked tokens
@@ -101,7 +101,7 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
      * @param token The address of the token to bridge
      * @param amount The amount of tokens to bridge
      */
-    function deposit(address token, uint256 amount) external nonReentrant {
+    function deposit(address token, uint256 amount) external payable nonReentrant {
         require(token != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than 0");
         require(wrappedTokens[token] != address(0), "Token not supported");
@@ -118,7 +118,7 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
             token,
             msg.sender,
             amount,
-            block.timestamp
+            block.number
         );
     }
 
@@ -143,7 +143,7 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
             token,
             user,
             amount,
-            block.timestamp
+            block.number
         );
     }
 
@@ -168,7 +168,7 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
             token,
             user,
             amount,
-            block.timestamp
+            block.number
         );
     }
 
@@ -199,7 +199,7 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
             token,
             user,
             amount,
-            block.timestamp
+            block.number
         );
     }
 }
