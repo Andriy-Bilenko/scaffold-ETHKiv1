@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
  * @title WrappedToken
@@ -14,6 +15,9 @@ contract WrappedToken is ERC20, Ownable {
 
     /// @notice The bridge contract allowed to mint and burn tokens
     address public immutable bridge;
+
+    /// @notice The number of decimals of the token
+    uint8 private immutable _decimals;
 
     /**
      * @dev Constructor sets up the wrapped token details and bridge association
@@ -33,6 +37,19 @@ contract WrappedToken is ERC20, Ownable {
 
         originalToken = _originalToken;
         bridge = msg.sender; // Set the bridge as the deployer
+
+        try IERC20Metadata(_originalToken).decimals() returns (uint8 tokenDecimals) {
+            _decimals = tokenDecimals;
+        } catch {
+            _decimals = 18; // Default to 18 decimals if call fails
+        }
+    }
+
+    /**
+     * @dev Override decimals to match the original token
+     */
+    function decimals() public view virtual override returns (uint8) {
+        return _decimals;
     }
 
     /**

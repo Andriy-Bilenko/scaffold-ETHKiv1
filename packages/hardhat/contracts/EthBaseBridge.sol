@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./WrappedToken.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
  * @title EthBaseBridge
@@ -60,18 +61,39 @@ contract EthBaseBridge is Ownable, ReentrancyGuard {
         require(originalToken != address(0), "Invalid token address");
         require(wrappedTokens[originalToken] == address(0), "Already exists");
 
-        string memory name = IERC20(originalToken).name();
-        string memory symbol = IERC20(originalToken).symbol();
+        // string memory name = IERC20(originalToken).name();
+        // string memory symbol = IERC20(originalToken).symbol();
 
-        // Create the wrapped token and set the bridge as the initial owner
-        WrappedToken wToken = new WrappedToken(
-            string(abi.encodePacked("Wrapped ", name)),
-            string(abi.encodePacked("w", symbol)),
-            originalToken,
-            address(this) // The bridge becomes the initial owner
-        );
+        // // Create the wrapped token and set the bridge as the initial owner
+        // WrappedToken wToken = new WrappedToken(
+        //     string(abi.encodePacked("Wrapped ", name)),
+        //     string(abi.encodePacked("w", symbol)),
+        //     originalToken,
+        //     address(this) // The bridge becomes the initial owner
+        // );
 
-        wrappedTokens[originalToken] = address(wToken);
+        // wrappedTokens[originalToken] = address(wToken);
+        try IERC20Metadata(originalToken).name() returns (string memory tokenName) {
+            try IERC20Metadata(originalToken).symbol() returns (string memory tokenSymbol) {
+                try IERC20Metadata(originalToken).decimals() returns (uint8 tokenDecimals) {
+                    // Create the wrapped token with the same decimals as original
+                    WrappedToken wToken = new WrappedToken(
+                        string(abi.encodePacked("Wrapped ", tokenName)),
+                        string(abi.encodePacked("w", tokenSymbol)),
+                        originalToken,
+                        address(this)
+                    );
+
+                    wrappedTokens[originalToken] = address(wToken);
+                } catch {
+                    revert("Failed to get token decimals");
+                }
+            } catch {
+                revert("Failed to get token symbol");
+            }
+        } catch {
+            revert("Failed to get token name");
+        }
     }
 
     /**
