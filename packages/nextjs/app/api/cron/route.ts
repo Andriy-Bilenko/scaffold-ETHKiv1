@@ -21,10 +21,10 @@ export async function GET() {
   }
 
   const firstChain: Chain = getChain(firstChainId);
-  //   const secondChain: Chain = getChain(secondChainId);
+  const secondChain: Chain = getChain(secondChainId);
 
   const firstContract: GenericContract = getContract(firstChainId, firstContractAddress);
-  //   const secondContract: GenericContract = getContract(secondChainId, secondContractAddress);
+  const secondContract: GenericContract = getContract(secondChainId, secondContractAddress);
 
   const client: PublicClient = createPublicClient({
     chain: firstChain,
@@ -40,19 +40,34 @@ export async function GET() {
     toBlock: "latest",
   });
 
-  const processedEvents: { topics: string[]; data: string }[] = events.map(event => {
-    return {
-      topics: event.topics,
-      data: event.data,
-    };
+  events.forEach(event => {
+    processEvent(event, firstContract, secondContract, client);
   });
 
-  return new Response(JSON.stringify({ events: processedEvents }), {
+  return new Response(JSON.stringify({ events }), {
     status: 200,
     headers: {
       "Content-Type": "application/json",
     },
   });
+}
+
+function processEvent(
+  event: Log,
+  firstContract: GenericContract,
+  secondContract: GenericContract,
+  client: PublicClient,
+) {
+  const token = event.topics[0];
+
+  const wrappedToken = client.readContract({
+    address: firstContract.address,
+    abi: firstContract.abi,
+    functionName: "wrappedTokens",
+    args: [token],
+  });
+
+  console.log("wrappedToken", wrappedToken);
 }
 
 function getChain(chainId: string) {
