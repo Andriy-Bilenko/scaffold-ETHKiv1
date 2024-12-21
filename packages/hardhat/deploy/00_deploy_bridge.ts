@@ -18,7 +18,7 @@ const deployEthBaseBridge: DeployFunction = async function (hre: HardhatRuntimeE
     existing PK which will fill DEPLOYER_PRIVATE_KEY_ENCRYPTED in the .env file (then used on hardhat.config.ts)
     You can run the `yarn account` command to check your balance in every network.
   */
-  const { deployer } = await hre.getNamedAccounts();
+  const deployer = (await hre.getUnnamedAccounts())[1];
   const { deploy } = hre.deployments;
 
   await deploy("EthBaseBridge", {
