@@ -4,7 +4,8 @@ import deployedContracts from "~~/contracts/deployedContracts";
 import { GenericContract } from "~~/utils/scaffold-eth/contract";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-const EVENT_SIGNATURE = "event YourEvent(address indexed from, uint256 value)";
+const EVENT_SIGNATURE =
+  "event TokensLocked(address indexed token, address indexed user, uint256 amount, uint256 blockNumber)";
 
 export async function GET() {
   const firstChainId: string = process.env.FIRST_CHAIN || "";
@@ -20,10 +21,10 @@ export async function GET() {
   }
 
   const firstChain: Chain = getChain(firstChainId);
-  const secondChain: Chain = getChain(secondChainId);
+  //   const secondChain: Chain = getChain(secondChainId);
 
   const firstContract: GenericContract = getContract(firstChainId, firstContractAddress);
-  const secondContract: GenericContract = getContract(secondChainId, secondContractAddress);
+  //   const secondContract: GenericContract = getContract(secondChainId, secondContractAddress);
 
   const client: PublicClient = createPublicClient({
     chain: firstChain,
@@ -71,7 +72,7 @@ function getContract(chainId: string, contractAddress: string): GenericContract 
     throw new Error(`Contracts for chainId ${chainId} not found`);
   }
 
-  const contract = Object.entries(chainContracts).find(e => e[0] === contractAddress)?.[1];
+  const contract = Object.entries(chainContracts).find(e => e[1].address === contractAddress)?.[1];
   if (!contract) {
     throw new Error(`Contract ${contractAddress} not found for chainId ${chainId}`);
   }
